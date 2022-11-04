@@ -34,6 +34,19 @@ with app.app_context():
         except:
             time.sleep(5)
 
+# increment the stats for a service and operation
+def update_stats(service, op):
+    service = value['service']
+    op=value['op']
+    with app.app_context():
+        stat = db.session.query(Stats).filter_by(service=service, op=op).first()
+        if stat is None:
+            stat = Stats(service, op)
+        stat.visits += 1
+        db.session.add(stat)
+        db.session.commit()
+
+
 def get_stats_service_op(service, op):
     with app.app_context():
         stat = db.session.query(Stats).filter_by(service=service, op=op).first()
@@ -90,6 +103,11 @@ def service(service):
 def stats():
     stats = get_stats()
     return make_response(jsonify(stats=stats), 200)
+
+@app.route('/stats/insert')
+def stats():
+    value = request.args.get('value')
+    return make_response(jsonify(stats=value), 200)
 
 def create_app():
     return app
