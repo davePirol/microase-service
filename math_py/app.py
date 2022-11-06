@@ -3,6 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 import requests
 import time
 
+STATS_URL = 'http://stats-service:5000'
+
 stats_db = "stats_db"
 user = "stats"
 password = "stats"
@@ -37,12 +39,13 @@ with app.app_context():
 # increment the stats for a service and operation
 def update_stats(service, op):
     with app.app_context():
-        stat = db.session.query(Stats).filter_by(service=service, op=op).first()
-        if stat is None:
-            stat = Stats(service, op)
-        stat.visits += 1
-        db.session.add(stat)
-        db.session.commit()
+        r = requests.post(STATS_URL,data={'service':service,'op':op})
+        #stat = db.session.query(Stats).filter_by(service=service, op=op).first()
+        #if stat is None:
+        #    stat = Stats(service, op)
+        #stat.visits += 1
+        #db.session.add(stat)
+        #db.session.commit()
 
 @app.route('/add')
 def add():
